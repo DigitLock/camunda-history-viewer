@@ -108,6 +108,14 @@
             padding: 40px;
             color: #999;
         }
+
+        .badge-decision {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -120,6 +128,7 @@
         <thead>
         <tr>
             <th>Process ID</th>
+            <th>REFUND DECISION</th>
             <th>Status</th>
             <th>Start Time</th>
             <th>Duration</th>
@@ -133,6 +142,13 @@
         <tr>
             <td>
                 <a href="/process/{{.ID}}" class="process-id">{{.ID}}</a>
+            </td>
+            <td>
+                {{if .RefundDecision}}
+                <span class="badge badge-decision">{{.RefundDecision}}</span>
+                {{else}}
+                —
+                {{end}}
             </td>
             <td>
                 {{if eq .State "ACTIVE"}}

@@ -29,6 +29,7 @@ type ProcessInstance struct {
 	ProcessDefinitionVersion int     `json:"processDefinitionVersion"`
 	BusinessKey              *string `json:"businessKey"`
 	DeleteReason             *string `json:"deleteReason"`
+	RefundDecision           string
 }
 
 type ActivityInstance struct {
@@ -100,10 +101,19 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Fetch refund_decision variable for each process
+	for i := range processes {
+		decision, err := fetchProcessVariable(processes[i].ID, "fareRuleCheck")
+		if err == nil && decision != "" {
+			processes[i].RefundDecision = decision
+		}
+	}
+
 	// Render template
 	err = templates.ExecuteTemplate(w, "home.html", processes)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Template error: %v", err)
+		return
 	}
 }
 
@@ -165,6 +175,43 @@ func fetchProcesses() ([]ProcessInstance, error) {
 	}
 
 	return processes, nil
+}
+
+func fetchProcessVariable(processInstanceId, variableName string) (string, error) {
+	url := fmt.Sprintf("%s/history/variable-instance?processInstanceId=%s&variableName=%s",
+		camundaBaseURL, processInstanceId, variableName)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", err
+	}
+
+	req.SetBasicAuth(camundaUser, camundaPass)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("status %d", resp.StatusCode)
+	}
+
+	var variables []struct {
+		Value string `json:"value"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&variables); err != nil {
+		return "", err
+	}
+
+	if len(variables) > 0 {
+		return variables[0].Value, nil
+	}
+
+	return "", nil
 }
 
 // Fetch process activity history
