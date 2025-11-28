@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Details - {{.ProcessID}}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        .back-link {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .process-id {
+            font-family: 'Courier New', monospace;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        td {
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .activity-type {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #666;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .status-icon {
+            font-size: 18px;
+            margin-right: 5px;
+        }
+
+        .status-success {
+            color: #4caf50;
+        }
+
+        .status-canceled {
+            color: #f44336;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/" class="back-link">← Back to Process List</a>
+
+    <h1>📊 Process Activity Timeline</h1>
+    <p class="process-id">Process ID: {{.ProcessID}}</p>
+
+    {{if .Activities}}
+    <table>
+        <thead>
+        <tr>
+            <th>Status</th>
+            <th>Activity Name</th>
+            <th>Type</th>
+            <th>Start Time</th>
+            <th>Duration</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{range .Activities}}
+        <tr>
+            <td>
+                {{if .Canceled}}
+                <span class="status-icon status-canceled">✗</span>
+                {{else}}
+                <span class="status-icon status-success">✓</span>
+                {{end}}
+            </td>
+            <td><strong>{{.ActivityName}}</strong></td>
+            <td><span class="activity-type">{{.ActivityType}}</span></td>
+            <td>{{formatTime .StartTime}}</td>
+            <td>{{.DurationInMillis}}ms</td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
+    {{else}}
+    <div class="no-data">
+        <p>No activity data found for this process</p>
+    </div>
+    {{end}}
+</div>
+</body>
+</html>

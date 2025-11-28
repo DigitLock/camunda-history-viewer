@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camunda Process History</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        td {
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .process-id {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #0066cc;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .process-id:hover {
+            text-decoration: underline;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status.active {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status.completed {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status.terminated {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .null-value {
+            color: #999;
+            font-style: italic;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔍 Camunda Process History</h1>
+    <p class="subtitle">Last 10 process instances for: <strong>ticket-refund</strong></p>
+
+    {{if .}}
+    <table>
+        <thead>
+        <tr>
+            <th>Process ID</th>
+            <th>Status</th>
+            <th>Start Time</th>
+            <th>Duration</th>
+            <th>Version</th>
+            <th>Business Key</th>
+            <th>Delete Reason</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{range .}}
+        <tr>
+            <td>
+                <a href="/process/{{.ID}}" class="process-id">{{.ID}}</a>
+            </td>
+            <td>
+                {{if eq .State "ACTIVE"}}
+                <span class="status active">{{.State}}</span>
+                {{else if eq .State "COMPLETED"}}
+                <span class="status completed">{{.State}}</span>
+                {{else}}
+                <span class="status terminated">{{.State}}</span>
+                {{end}}
+            </td>
+            <td>{{formatTime .StartTime}}</td>
+            <td>{{formatDuration .DurationInMillis}}</td>
+            <td>v{{.ProcessDefinitionVersion}}</td>
+            <td>
+                {{if .BusinessKey}}
+                {{.BusinessKey}}
+                {{else}}
+                <span class="null-value">—</span>
+                {{end}}
+            </td>
+            <td>
+                {{if .DeleteReason}}
+                {{.DeleteReason}}
+                {{else}}
+                <span class="null-value">—</span>
+                {{end}}
+            </td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
+    {{else}}
+    <div class="no-data">
+        <p>No process instances found</p>
+    </div>
+    {{end}}
+</div>
+</body>
+</html>
